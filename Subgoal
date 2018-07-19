@@ -1,0 +1,107 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset='UTF-8'>
+	<meta name="robots" content="noindex">
+</head>
+<body>
+	<script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-url-parser/2.3.1/purl.js"></script>
+	<!--<script src="https://ajax.googleapis.com/ajax/libs/webfont/1.5.18/webfont.js"></script>-->
+	<style type="text/css" scoped>
+		body {
+			background: transparent;
+			font-weight: 900;
+			font-size: 50px;
+			/*color:#ffffff;*/
+			/*text-shadow:
+				1px 3px 0 #000, 2px 2px 0px #000, 3px 1px 0px #000, 3px 0px 0px #000, 3px -1px 0px #000, 2px -2px 0px #000, 1px -3px 0px #000,
+				-1px 3px 0px #000, -2px 2px 0px #000, -3px 1px 0px #000, -3px 0px 0px #000, -3px -1px 0px #000, -2px -2px 0px #000, -1px -3px 0px #000,
+				3px 1px 0px #000, 2px 2px 0px #000, 1px 3px 0px #000, 0px 3px 0px #000, -1px 3px 0px #000, -2px 2px 0px #000, -3px 1px 0px #000,
+				3px -1px 0px #000, 2px -2px 0px #000, 1px -3px 0px #000, 0px -3px 0px #000, -1px -3px 0px #000, -2px -2px 0px #000, -3px -1px 0px #000;*/
+		}
+		
+	</style>
+	<div id="posts">
+		<div class="youtube"><span class="goalText"></span>&nbsp;<span class="count"></span><span class="goal"></span></div>
+	</div>
+
+    <script>
+        var effect = $.url().param('effect');
+        var font = $.url().param('font');
+		var fontColor = $.url().param('fontColor');
+        var headID = document.getElementsByTagName('head')[0];
+        var link = document.createElement('link');
+        var url;
+        if(effect){
+            url = 'https://fonts.googleapis.com/css?family='+font+'&effect='+effect;
+        }
+        else {//if(effect === undefined || effect === null){
+            url = 'https://fonts.googleapis.com/css?family='+font;
+        }
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.href = url;
+        headID.appendChild(link);
+
+        document.getElementById('posts').className = 'font-effect-'+effect;
+        document.getElementById('posts').style.fontFamily = font;
+		document.getElementById('posts').style.color = fontColor;
+    </script>
+
+    <script>
+		function init() {
+			// Parse setup parameters.
+			var channel = $.url().param('channel');
+			var goal = $.url().param('goal');
+			var goalText = $.url().param('goalText');
+			//var audio = $.url().param('audio');
+            //var playAudio = document.createElement('audio');
+			var subscribersCurrent = "0";
+			var subscribersPrior = "0";
+			
+			/* Load Googles Webfont API*/
+			/*WebFont.load({
+				google: {
+					families: [font]
+				}
+				});*/
+				
+			if (font) { $(".wf-active body, .wf-inactive body, #posts").css("font-family", font) }	  
+			if (!channel) { channel = 'UC0kM0b8W3_rQ09ikl3p29pA'; }
+			if (goal) { $('.goal').text(" / " + goal); }
+			if (goalText) { $('.goalText').text(goalText); }
+            //else if (!goalText)
+			
+			function updateSubCount() {
+				$.ajax({
+                    url: 'https://www.googleapis.com/youtube/v3/channels?part=statistics&id=' + channel + '&key=AIzaSyB1T1HtSnP_YHM0cPVmHcbdrBT0MOXQnR8',
+                    dataType: 'json',
+                    type: 'GET'
+                }).done( function (data) {
+						subscribersCurrent = data.items[0].statistics.subscriberCount;
+						$('.count').text(subscribersCurrent);
+					}
+				);
+
+                /*if ( (subscribersCurrent > subscribersPrior) && (subscribersPrior !== "0") ) {
+                    setTimeout(function () {
+                        if (audio) {
+                            playAudio.setAttribute('src', './audio/' + audio);
+                            //playAudio.load();
+                            playAudio.play();
+                        }
+                    }, 1000);
+				}*/
+				subscribersPrior = subscribersCurrent;
+			}
+			setInterval(updateSubCount, 30000);
+			updateSubCount();
+
+		}
+		init();
+	</script>
+
+</body>
+</html>
